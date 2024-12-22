@@ -1,22 +1,23 @@
 """Config flow for State Machine integration."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, cast, Optional
+import logging
+from typing import Any, Optional, cast
 
 import voluptuous as vol
 
-from homeassistant.core import callback
+from homeassistant import config_entries, core, data_entry_flow
 from homeassistant.const import CONF_ENTITY_ID
+from homeassistant.core import callback
 from homeassistant.helpers import selector
-from homeassistant import data_entry_flow, config_entries, core
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.schema_config_entry_flow import (
     SchemaConfigFlowHandler,
     SchemaFlowFormStep,
     SchemaFlowMenuStep,
 )
-import homeassistant.helpers.config_validation as cv
-import logging
 
 from .const import DOMAIN
 
@@ -28,7 +29,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def normalize_input(user_input: Optional[dict[str, Any]]) -> dict[str, str]:
-    """Validate states"""
+    """Validate states."""
+
     _LOGGER.warning("Validate: %s", user_input)
 
     errors = {}
@@ -55,7 +57,8 @@ class StateMachineConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.options: dict[str, Any] = {}
 
     async def async_step_user(self, user_input: Optional[dict[str, Any]] = None):
-        """Invoked when a user initiates a flow via the user interface."""
+        """First step when user starts configuring."""
+
         _LOGGER.warning("Show Setup UI & validate input: %s", user_input)
         errors: dict[str, str] = {}
 
@@ -94,7 +97,7 @@ class StateMachineConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Options Flow Handler"""
+    """Options Flow Handler."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
@@ -149,7 +152,7 @@ def _build_options_schema__transitions(
     schema = {}
 
     for state in states:
-        schema[vol.Required(state, default="Triggers for %s" % state)] = cv.string
+        schema[vol.Required(state, default=f"Triggers for {state}")] = cv.string
 
     return vol.Schema(schema)
 
